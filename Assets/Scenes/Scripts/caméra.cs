@@ -1,22 +1,45 @@
 using UnityEngine;
 
-public class CameraFollow : MonoBehaviour
+public class CameraFollowWithZoneTriggers : MonoBehaviour
 {
-    public Transform player;    // Le personnage à suivre
-    public float smoothSpeed = 0.125f; // Pour un suivi fluide
-    public Vector3 offset;    // Décalage de la caméra par rapport au personnage
+    public Transform player;            // Référence au joueur
+    public float moveSpeed = 2f;        // Vitesse de déplacement vertical
 
+    private float targetY;              // Hauteur vers laquelle on se dirige
+    private bool isMovingY = false;     // Est-ce qu'on est en train de bouger verticalement ?
 
-    // Update est appelé une fois par frame
-    void LateUpdate()
+    void Start()
     {
-        // Créer la position souhaitée de la caméra
-        Vector3 desiredPosition = new Vector3(player.position.x + offset.x, transform.position.y, transform.position.z);
+        // Hauteur initiale
+        targetY = transform.position.y;
+    }
 
-        // Interpoler la position de la caméra pour un mouvement fluide
-        Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
+    void Update()
+    {
+        Vector3 camPos = transform.position;
 
-        // Appliquer la position de la caméra
-        transform.position = smoothedPosition;
+        // Suivre le joueur sur l'axe X
+        camPos.x = player.position.x;
+
+        // Si un mouvement vertical est en cours, avancer vers targetY
+        if (isMovingY)
+        {
+            camPos.y = Mathf.MoveTowards(transform.position.y, targetY, moveSpeed * Time.deltaTime);
+
+            // Quand la position cible est atteinte, arrêter le mouvement
+            if (Mathf.Approximately(camPos.y, targetY))
+            {
+                isMovingY = false;
+            }
+        }
+
+        transform.position = new Vector3(camPos.x, camPos.y, transform.position.z);
+    }
+
+    // Méthode appelée par une zone pour déclencher le déplacement vers un Y spécifique
+    public void MoveCameraToY(float newY)
+    {
+        targetY = newY;
+        isMovingY = true;
     }
 }
