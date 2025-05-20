@@ -23,7 +23,7 @@ public class PlayerHealth : MonoBehaviour
             Respawn();
         }
     }
-
+   
     void Respawn()
     {
         Debug.Log("Respawn à : " + currentRespawnPoint.position);
