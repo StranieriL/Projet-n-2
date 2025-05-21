@@ -8,6 +8,7 @@ public class EnemyDamage : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            // Appliquer les dégâts
             PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {

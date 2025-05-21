@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -7,18 +6,22 @@ public class PlayerMovement : MonoBehaviour
     public float jumpForce = 1f;
     private Rigidbody2D rb;
     private bool isGrounded = true;
+    private bool isCaptured = false; // Si le joueur est capturé
+    private Transform player; // Joueur capturé
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
     }
+
     void Update()
     {
+        if (isCaptured)
+            return;  // Si le joueur est capturé, ne rien faire
+
         // Déplacement gauche/droite
         float moveX = Input.GetAxis("Horizontal"); // Gauche (-1) à Droite (+1)
-
         Vector3 movement = new Vector3(moveX, 0f, 0f); // Seulement sur l'axe X
-
         transform.position += movement * speed * Time.deltaTime;
 
         // Saut
@@ -28,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
             isGrounded = false;
         }
     }
+
     // Détecter si le joueur touche le sol
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -36,22 +40,18 @@ public class PlayerMovement : MonoBehaviour
             isGrounded = true;
         }
     }
-}
-public class FallDetector : MonoBehaviour
-{
-    public float deathY = -6f; // Hauteur de chute mortelle
 
-    void Update()
+    // Méthode pour capturer le joueur
+    public void Capture()
     {
-        if (transform.position.y < deathY)
-        {
-            Die();
-        }
+        isCaptured = true;
+        rb.isKinematic = true; // Désactive la physique
     }
 
-    void Die()
+    // Méthode pour libérer le joueur
+    public void Release()
     {
-        Debug.Log("Le joueur est tombé !");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Recharge la scène actuelle
+        isCaptured = false;
+        rb.isKinematic = false; // Réactive la physique
     }
 }
