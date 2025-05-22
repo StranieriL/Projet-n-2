@@ -2,12 +2,13 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Mouvement")]
     public float speed = 2f;
-    public float jumpForce = 1f;
+    public float jumpForce = 5f;
+
     private Rigidbody2D rb;
-    private bool isGrounded = true;
-    private bool isCaptured = false; // Si le joueur est capturé
-    private Transform player; // Joueur capturé
+    private bool isGrounded = false;
+    private bool isCaptured = false;
 
     void Start()
     {
@@ -16,13 +17,12 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (isCaptured)
-            return;  // Si le joueur est capturé, ne rien faire
+        if (isCaptured) return;
 
-        // Déplacement gauche/droite
-        float moveX = Input.GetAxis("Horizontal"); // Gauche (-1) à Droite (+1)
-        Vector3 movement = new Vector3(moveX, 0f, 0f); // Seulement sur l'axe X
-        transform.position += movement * speed * Time.deltaTime;
+        // Mouvement horizontal
+        float moveX = Input.GetAxis("Horizontal");
+        Vector3 move = new Vector3(moveX, 0f, 0f);
+        transform.position += move * speed * Time.deltaTime;
 
         // Saut
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
@@ -32,26 +32,31 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // Détecter si le joueur touche le sol
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.contacts[0].normal.y > 0.5f)
+        foreach (ContactPoint2D contact in collision.contacts)
         {
-            isGrounded = true;
+            if (contact.normal.y > 0.5f)
+            {
+                isGrounded = true;
+                break;
+            }
         }
     }
 
-    // Méthode pour capturer le joueur
+    // Appelé quand le joueur est attrapé par un piège
     public void Capture()
     {
         isCaptured = true;
-        rb.isKinematic = true; // Désactive la physique
+        rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        rb.isKinematic = true;
     }
 
-    // Méthode pour libérer le joueur
+    // Appelé après un piège ou respawn
     public void Release()
     {
         isCaptured = false;
-        rb.isKinematic = false; // Réactive la physique
+        rb.isKinematic = false;
     }
 }
